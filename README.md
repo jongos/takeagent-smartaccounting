@@ -8,7 +8,7 @@ Run `npm test` with Node 22 or later. No dependencies, credentials or external r
 
 ## Supported profile
 
-Only `takeagent-synthetic-cost-v1` is supported. No actual EP report version is certified. Missing fields fail; values are never inferred from EFC or other columns. The normalized input requires tenant/project IDs, source project and revision, as-of date, currency, reporting basis, detail account IDs, six distinct measures and independent report totals. Source-row numbers refer to the supplied normalized rows, not an original Excel sheet. Account hierarchy and original Excel cell provenance remain future work.
+Only `takeagent-synthetic-cost-v1` is supported, with USD, EUR, GBP, CAD or AUD. Other currency exponents are rejected. No actual EP report version is certified. Missing fields fail; values are never inferred from EFC or other columns. The normalized input requires tenant/project IDs, source project and revision, as-of date, currency, reporting basis, detail account IDs, six distinct measures and independent report totals. Source-row numbers refer to the supplied normalized rows, not an original Excel sheet. Account hierarchy and original Excel cell provenance remain future work.
 
 ## Next work
 

@@ -27,3 +27,4 @@ test('idempotent preview and revision conflict', () => {
   r.revision = 'r2'; assert.equal(compare(first, preview(r, context)).deltas.actuals, '100');
 });
 test('cross-project comparison fails', () => { const a = preview(fixture(), context); const r = fixture(); r.projectId = 'other'; const b = preview(r, {...context, projectId:'other'}); assert.throws(() => compare(a,b), /SCOPE/); });
+test('rejects unsupported currency precision', () => { for (const currency of ['JPY', 'KWD', 'ZZZ']) { const r = fixture(); r.currency = currency; assert.throws(() => preview(r, {...context, currency}), /CURRENCY/); } });

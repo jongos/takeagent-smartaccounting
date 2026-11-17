@@ -18,7 +18,7 @@ export function preview(report, context) {
   requireValue(report.tenantId === context.tenantId && report.projectId === context.projectId, 'PROJECT_MISMATCH');
   requireValue(identifier(report.sourceProjectId) && identifier(report.revision), 'INVALID_PROVENANCE');
   requireValue(date(report.asOf) && date(context.today) && report.asOf <= context.today, 'INVALID_DATE');
-  requireValue(/^[A-Z]{3}$/.test(report.currency) && report.currency === context.currency, 'CURRENCY_MISMATCH');
+  requireValue(['USD', 'EUR', 'GBP', 'CAD', 'AUD'].includes(report.currency) && report.currency === context.currency, 'CURRENCY_MISMATCH');
   requireValue(report.basis === 'cumulative' && report.commitmentBasis === 'unpaid-not-in-actuals', 'UNSUPPORTED_BASIS');
   requireValue(report.complete === true, 'PARTIAL_REPORT');
   requireValue(Array.isArray(report.rows) && report.rows.length > 0 && report.rows.length <= 10000, 'INVALID_ROWS');
