@@ -1,3 +1,8 @@
+function linkAccount(value) { return typeof value === 'string' && /^[A-Za-z0-9_.:-]{1,100}$/.test(value); }
+function requireLink(link) {
+  if (!link || typeof link !== 'object' || Array.isArray(link)) throw new Error('INVALID_BUDGET_MAPPING');
+  if (!linkAccount(link.sourceAccount) || !linkAccount(link.budgetAccount)) throw new Error('INVALID_BUDGET_MAPPING');
+}
 /** Explicit one-to-one account links; linking is a preview, never a budget overwrite. */
 export function previewBudgetMapping(costPreview, budget, links) {
   const s = costPreview.snapshot;
@@ -18,6 +23,7 @@ export function previewBudgetMapping(costPreview, budget, links) {
   }
   const linkedCosts = new Set(), linkedBudgets = new Set();
   const mapped = links.map(link => {
+    requireLink(link);
     if (!costs.has(link.sourceAccount) || !budgets.has(link.budgetAccount) || linkedCosts.has(link.sourceAccount) || linkedBudgets.has(link.budgetAccount)) throw new Error('AMBIGUOUS_BUDGET_MAPPING');
     linkedCosts.add(link.sourceAccount); linkedBudgets.add(link.budgetAccount);
     const path = []; let account = budgets.get(link.budgetAccount);

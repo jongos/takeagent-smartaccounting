@@ -29,3 +29,9 @@ Validation: all 41 tests passed, including real two-account CSV reorder, distinc
 ## 2026-11-17 — Record current optional host release
 
 Added `docs/host-release-status.md` linking the deployed TakeAgent CSV/Excel release and explaining the division between shared host file handling and this adapter. Preserved optional installation, no-new-configuration behavior and vendor-access limitations. Refetched origin and verified the existing adapter source was already synchronized. The complete repository suite passed 41/41 tests. This commit changes documentation only; no adapter or deployment change is claimed.
+
+## 2026-11-17 — Harden compare, validation, CSV limits, and CI (issues #4–#10)
+
+Triage on `origin/main` at `50e18be`: #3 closed on main (`72558e5`); #1 closed as host-catalog work; #2 still blocked on vendor export/API input. Implemented code fixes for open defects #4–#10: compare no longer treats missing fingerprints as unchanged; stored snapshots are validated before `BigInt` conversion; budget-mapping links reject null or malformed entries; snapshot `fingerprint` uses canonical key ordering via exported `fingerprintSnapshot`; amount parsing returns distinct codes for parentheses, grouping, currency symbols, and decimal-comma formats; `parseCsv` fails at 10,000 data rows to match `preview()`; CI runs `npm run lint` plus expanded regression tests.
+
+Validation: `npm run lint` and `npm test` passed 51/51. Supersedes the overlapping open PR #11 branch for coordinator review on `cursor/fix-open-github-issues-7274`. No vendor fixtures, secrets, or live EP access.

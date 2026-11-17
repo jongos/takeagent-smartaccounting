@@ -8,7 +8,7 @@ export function parseCsv(text) {
   text = text.replace(/^\uFEFF/, '');
   const rows = []; let row = [], value = '', quoted = false, closed = false;
   function cell() { if (value.length > 2000) fail('CELL_TOO_LONG'); row.push(value); value = ''; closed = false; if (row.length > 64) fail('TOO_MANY_COLUMNS'); }
-  function line() { cell(); rows.push(row); row = []; if (rows.length > 10002) fail('TOO_MANY_ROWS'); }
+  function line() { cell(); rows.push(row); row = []; if (rows.length > 10001) fail('TOO_MANY_ROWS'); }
   for (let i = 0; i < text.length; i++) {
     const c = text[i];
     if (quoted) { if (c === '"') { if (text[i+1] === '"') { value += '"'; i++; } else { quoted = false; closed = true; } } else value += c; }

@@ -1,6 +1,6 @@
 import { test } from 'node:test';
 import assert from 'node:assert/strict';
-import { preview, compare, fields } from '../src/snapshot.js';
+import { preview, compare, fields, fingerprintSnapshot } from '../src/snapshot.js';
 const context = { tenantId: 'tenant-demo', projectId: 'project-demo', currency: 'USD', today: '2026-11-17' };
 function fixture() {
   const amounts = Object.fromEntries(fields.map(f => [f, '100.00']));
@@ -29,3 +29,14 @@ test('idempotent preview and revision conflict', () => {
 test('cross-project comparison fails', () => { const a = preview(fixture(), context); const r = fixture(); r.projectId = 'other'; const b = preview(r, {...context, projectId:'other'}); assert.throws(() => compare(a,b), /SCOPE/); });
 test('rejects unsupported currency precision', () => { for (const currency of ['JPY', 'KWD', 'ZZZ']) { const r = fixture(); r.currency = currency; assert.throws(() => preview(r, {...context, currency}), /CURRENCY/); } });
 test('rejects unspecified or filtered report scope',()=>{for(const reportScope of [undefined,'location-1-only']){const r=fixture();r.reportScope=reportScope;assert.throws(()=>preview(r,context),/REPORT_SCOPE/);}});
+test('compare without fingerprints still detects financial deltas',()=>{
+  const amounts=Object.fromEntries(fields.map(f=>[f,'100.00']));
+  const base={profile:'takeagent-synthetic-cost-v1',...context,sourceProjectId:'ep-demo',revision:'r1',asOf:'2026-11-01',basis:'cumulative',commitmentBasis:'unpaid-not-in-actuals',reportScope:'full-project-unfiltered',complete:true,rows:[{account:'1000',kind:'detail',...amounts}],totals:amounts};
+  const a=preview(structuredClone(base),context),b=preview({...structuredClone(base),rows:[{...base.rows[0],actuals:'200.00'}],totals:{...amounts,actuals:'200.00'},revision:'r2',asOf:'2026-11-02'},context);
+  assert.equal(compare({snapshot:a.snapshot},{snapshot:b.snapshot}).status,'revision-preview');
+});
+test('compare rejects malformed snapshot amounts',()=>{const p=preview(fixture(),context);const bad=structuredClone(p);bad.snapshot.totals.actuals='not-an-integer';assert.throws(()=>compare(p,bad),/INVALID_SNAPSHOT/);});
+test('fingerprint is stable when snapshot object key order differs',()=>{
+  const p=preview(fixture(),context);const keys=Object.keys(p.snapshot);const reversed=Object.fromEntries([...keys].reverse().map(k=>[k,p.snapshot[k]]));assert.equal(fingerprintSnapshot(p.snapshot),fingerprintSnapshot(reversed));
+});
+for (const [label,value,code] of [['parentheses','(5.25)','PARENTHESES'],['grouping','1,000.00','GROUPING'],['currency','$5.25','CURRENCY'],['decimal comma','5,25','DECIMAL_COMMA']]) test(`rejects ${label} amount format`,()=>{const r=fixture();r.rows[0].actuals=value;r.totals.actuals=value;assert.throws(()=>preview(r,context),new RegExp(code));});

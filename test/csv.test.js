@@ -10,6 +10,8 @@ test('CSV mapping preserves physical row, exact totals and file fingerprint', ()
 test('quoted fields, BOM, CRLF and final newline', () => { assert.deepEqual(parseCsv('\uFEFFa,b\r\n"x,y","z""z"\r\n'),[['a','b'],['x,y','z"z']]); });
 for (const [label, value] of [['ragged','a,b\n1'],['duplicate headers','a,a\n1,2'],['unterminated','a,b\n"1,2'],['trailing junk','a,b\n"1"x,2'],['blank header',',b\n1,2'],['null byte','a,b\n1,\0']]) test(`rejects ${label}`,()=>assert.throws(()=>parseCsv(value)));
 test('rejects oversized data and cells',()=>{assert.throws(()=>parseCsv('a'.repeat(2000001)));assert.throws(()=>parseCsv('a\n'+'x'.repeat(2001)));});
+test('rejects more than 10000 data rows',()=>{const header='account,value';const rows=[header,...Array.from({length:10001},(_,i)=>`acct-${i},1`)];assert.throws(()=>parseCsv(rows.join('\n')),/TOO_MANY_ROWS/);});
+test('accepts exactly 10000 data rows',()=>{const header='account,value';const rows=[header,...Array.from({length:10000},(_,i)=>`acct-${i},1`)];assert.equal(parseCsv(rows.join('\n')).length,10001);});
 test('mapping must be complete and distinct',()=>{ const o=options();o.mapping.actuals='account';assert.throws(()=>previewCsv(csv(),o,context),/MAPPING/); });
 test('rejects unrelated upload columns',()=>assert.throws(()=>previewCsv(csv().replace('account,','worker,account,').replace('1000,','private,1000,'),options(),context),/UNSELECTED/));
 test('formula amounts never execute',()=>assert.throws(()=>previewCsv(csv().replace('1000,100,','1000,=1+1,'),options(),context),/AMOUNT/));

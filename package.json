@@ -1,1 +1,1 @@
-{"name":"takeagent-smartaccounting","version":"0.1.0","private":true,"type":"module","scripts":{"test":"node --test"},"engines":{"node":">=22"}}
+{"name":"takeagent-smartaccounting","version":"0.1.0","private":true,"type":"module","scripts":{"lint":"node --check src/budget-mapping.js src/companion.js src/csv.js src/snapshot.js","test":"node --test"},"engines":{"node":">=22"}}
