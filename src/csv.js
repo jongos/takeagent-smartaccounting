@@ -20,7 +20,7 @@ export function parseCsv(text) {
   }
   if (quoted) fail('UNTERMINATED_QUOTE');
   if (value !== '' || row.length || closed) line();
-  if (rows.length < 2 || !rows[0].length || new Set(rows[0]).size !== rows[0].length || rows[0].some(x => !x.trim())) fail('INVALID_HEADERS');
+  if (rows.length < 2 || !rows[0].length || new Set(rows[0]).size !== rows[0].length || rows[0].some(x => !x.trim() || /[\r\n]/.test(x))) fail('INVALID_HEADERS');
   if (rows.some(r => r.length !== rows[0].length)) fail('RAGGED_CSV');
   return rows;
 }

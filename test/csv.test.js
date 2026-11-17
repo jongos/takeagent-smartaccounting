@@ -4,7 +4,7 @@ import { fields, compare } from '../src/snapshot.js';
 import { parseCsv, previewCsv } from '../src/csv.js';
 import { costFindings } from '../src/companion.js';
 const context = {tenantId:'demo',projectId:'demo',currency:'USD',today:'2026-11-17'};
-const options = () => ({ mapping:Object.fromEntries(['account',...fields].map(x=>[x,x])), metadata:{...context,sourceProjectId:'demo',revision:'r1',asOf:'2026-11-17',basis:'cumulative',commitmentBasis:'unpaid-not-in-actuals',complete:true},totals:Object.fromEntries(fields.map(x=>[x,'100'])) });
+const options = () => ({ mapping:Object.fromEntries(['account',...fields].map(x=>[x,x])), metadata:{...context,sourceProjectId:'demo',revision:'r1',asOf:'2026-11-17',basis:'cumulative',commitmentBasis:'unpaid-not-in-actuals',reportScope:'full-project-unfiltered',complete:true},totals:Object.fromEntries(fields.map(x=>[x,'100'])) });
 const csv = () => ['account,'+fields.join(','),'1000,100,100,100,100,100,100'].join('\r\n');
 test('CSV mapping preserves physical row, exact totals and file fingerprint', () => { const p = previewCsv(csv(),options(),context); assert.equal(p.snapshot.rows[0].sourceRow,2); assert.equal(p.snapshot.totals.actuals,'10000'); assert.match(p.provenance.sha256,/^[a-f0-9]{64}$/); });
 test('quoted fields, BOM, CRLF and final newline', () => { assert.deepEqual(parseCsv('\uFEFFa,b\r\n"x,y","z""z"\r\n'),[['a','b'],['x,y','z"z']]); });
@@ -15,3 +15,4 @@ test('rejects unrelated upload columns',()=>assert.throws(()=>previewCsv(csv().r
 test('formula amounts never execute',()=>assert.throws(()=>previewCsv(csv().replace('1000,100,','1000,=1+1,'),options(),context),/AMOUNT/));
 test('account additions/removals visible across same-total revision',()=>{ const a=previewCsv(csv(),options(),context);const o=options();o.metadata.revision='r2';const b=previewCsv(csv().replace('1000,','2000,'),o,context);const c=compare(a,b);assert.deepEqual(c.accounts.map(x=>x.change),['removed','added']); });
 test('cost finding never calls cost overrun a funding gap',()=>{const o=options();o.totals.estimatedFinalCost='150';const p=previewCsv(csv().replace(/100$/,'150'),o,context);const f=costFindings(p);assert.equal(f.findings[0].amount,'5000');assert.equal(f.fundingGap,null);assert.equal(f.cashTimingGap,null);});
+test('rejects multiline headers to preserve physical row provenance',()=>assert.throws(()=>parseCsv('"account\ncode",value\n1000,1'),/HEADERS/));

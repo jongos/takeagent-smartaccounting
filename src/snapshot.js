@@ -20,6 +20,7 @@ export function preview(report, context) {
   requireValue(date(report.asOf) && date(context.today) && report.asOf <= context.today, 'INVALID_DATE');
   requireValue(['USD', 'EUR', 'GBP', 'CAD', 'AUD'].includes(report.currency) && report.currency === context.currency, 'CURRENCY_MISMATCH');
   requireValue(report.basis === 'cumulative' && report.commitmentBasis === 'unpaid-not-in-actuals', 'UNSUPPORTED_BASIS');
+  requireValue(report.reportScope === 'full-project-unfiltered', 'UNSUPPORTED_REPORT_SCOPE');
   requireValue(report.complete === true, 'PARTIAL_REPORT');
   requireValue(Array.isArray(report.rows) && report.rows.length > 0 && report.rows.length <= 10000, 'INVALID_ROWS');
   const totals = Object.fromEntries(fields.map(f => [f, 0n]));
@@ -35,7 +36,7 @@ export function preview(report, context) {
   for (const f of fields) requireValue(totals[f] === cents(report.totals?.[f]), 'TOTAL_MISMATCH');
   const snapshot = { source: 'ep-smartaccounting', profile: report.profile, tenantId: report.tenantId, projectId: report.projectId,
     sourceProjectId: report.sourceProjectId, revision: report.revision, asOf: report.asOf, currency: report.currency,
-    basis: report.basis, commitmentBasis: report.commitmentBasis, rows,
+    basis: report.basis, commitmentBasis: report.commitmentBasis, reportScope: report.reportScope, rows,
     totals: Object.fromEntries(fields.map(f => [f, totals[f].toString()])) };
   const fingerprint = createHash('sha256').update(JSON.stringify(snapshot)).digest('hex');
   const ageDays = Math.floor((Date.parse(context.today) - Date.parse(report.asOf)) / 86400000);
@@ -45,7 +46,7 @@ export function preview(report, context) {
 /** Compare snapshots without mutating either or writing any finance-plan entries. */
 export function compare(previous, next) {
   const a = previous.snapshot, b = next.snapshot;
-  for (const key of ['tenantId','projectId','sourceProjectId','currency','profile','basis','commitmentBasis']) requireValue(a[key] === b[key], 'SNAPSHOT_SCOPE_MISMATCH');
+  for (const key of ['tenantId','projectId','sourceProjectId','currency','profile','basis','commitmentBasis','reportScope']) requireValue(a[key] === b[key], 'SNAPSHOT_SCOPE_MISMATCH');
   if (previous.fingerprint === next.fingerprint) return { status: 'unchanged', deltas: {} };
   requireValue(a.revision !== b.revision, 'REVISION_CONFLICT');
   requireValue(b.asOf >= a.asOf, 'OLDER_REPORT');

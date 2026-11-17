@@ -5,7 +5,7 @@ const context = { tenantId: 'tenant-demo', projectId: 'project-demo', currency: 
 function fixture() {
   const amounts = Object.fromEntries(fields.map(f => [f, '100.00']));
   return { profile: 'takeagent-synthetic-cost-v1', ...context, sourceProjectId: 'ep-demo', revision: 'r1', asOf: '2026-11-01',
-    basis: 'cumulative', commitmentBasis: 'unpaid-not-in-actuals', complete: true,
+    basis: 'cumulative', commitmentBasis: 'unpaid-not-in-actuals', reportScope: 'full-project-unfiltered', complete: true,
     rows: [{ account: '1000', kind: 'detail', ...amounts }], totals: amounts };
 }
 test('exact cents, minimization and nonmutation', () => {
@@ -28,3 +28,4 @@ test('idempotent preview and revision conflict', () => {
 });
 test('cross-project comparison fails', () => { const a = preview(fixture(), context); const r = fixture(); r.projectId = 'other'; const b = preview(r, {...context, projectId:'other'}); assert.throws(() => compare(a,b), /SCOPE/); });
 test('rejects unsupported currency precision', () => { for (const currency of ['JPY', 'KWD', 'ZZZ']) { const r = fixture(); r.currency = currency; assert.throws(() => preview(r, {...context, currency}), /CURRENCY/); } });
+test('rejects unspecified or filtered report scope',()=>{for(const reportScope of [undefined,'location-1-only']){const r=fixture();r.reportScope=reportScope;assert.throws(()=>preview(r,context),/REPORT_SCOPE/);}});
