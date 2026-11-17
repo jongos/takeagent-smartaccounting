@@ -1,0 +1,10 @@
+{
+  "id": "smartaccounting",
+  "displayName": "EP SmartAccounting",
+  "status": "development",
+  "liveEnabled": false,
+  "capabilities": ["bounded-csv-preview", "explicit-column-mapping", "signed-cost-reconciliation", "revision-comparison", "source-linked-cost-findings", "explicit-budget-account-mapping"],
+  "blockers": ["Representative sanitized EP report and version needed", "Vendor export schema validation pending", "Native XLSX and authenticated host wiring pending", "Vendor-supported API access and terms unverified"],
+  "sourceIssue": "https://github.com/jongos/takeagent/issues/60",
+  "repository": "https://github.com/jongos/takeagent-smartaccounting"
+}

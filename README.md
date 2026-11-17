@@ -2,7 +2,9 @@
 
 Private development spike for [TakeAgent issue #60](https://github.com/jongos/takeagent/issues/60). This is a tested normalized cost-snapshot preview library, not an EP-certified export parser, live connector, or deployed TakeAgent feature.
 
-Run `npm test` with Node 22 or later. No dependencies, credentials or external requests are needed.
+Run `npm test` with Node 22 or later. No dependencies, credentials or external requests are needed. CI runs the same suite on Linux.
+
+The expanded adapter supports bounded selected CSV tables through `parseCsv` / `previewCsv`, explicit column mapping, file hash and row provenance, account-level revision deltas, and source-linked descriptive cost findings. `previewBudgetMapping` previews explicit links into a host budget with validated hierarchy without overwriting it. See [host contract](docs/host-integration.md), [remaining inputs](docs/blockers.md), and [development manifest](integration-manifest.json).
 
 `preview(report, context)` accepts the synthetic contract demonstrated in `test/snapshot.test.js`. It keeps six cost measures separate, requires exact signed decimal amounts, checks totals and scope, rejects subtotals/duplicate accounts, strips unrelated fields, and returns provenance, a deterministic fingerprint and stale-report warnings. Amounts in output are integer minor-unit strings using two decimal places. `compare` handles repeated imports and previews revision deltas without mutation. Input limits are 10,000 detail rows and 12 integer digits per amount. Only cumulative, single-currency reports with unpaid commitments explicitly excluded from actuals are supported. No FX conversion or currency-specific precision inference.
 

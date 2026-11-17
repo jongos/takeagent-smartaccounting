@@ -1,0 +1,11 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { previewBudgetMapping } from '../src/budget-mapping.js';
+const cost = {snapshot:{tenantId:'t',projectId:'p',currency:'USD',revision:'c1',rows:[{account:'1000'}]}};
+const budget = () => ({tenantId:'t',projectId:'p',currency:'USD',revision:'b1',accounts:[{id:'department'},{id:'line',parentId:'department'}]});
+const links = [{sourceAccount:'1000',budgetAccount:'line'}];
+test('explicit hierarchy mapping does not mutate budget',()=>{const b=budget(),before=structuredClone(b);assert.deepEqual(previewBudgetMapping(cost,b,links).links[0].budgetPath,['department','line']);assert.deepEqual(b,before);});
+test('missing links stay visible',()=>assert.deepEqual(previewBudgetMapping(cost,budget(),[]).unmappedSourceAccounts,['1000']));
+test('blocks cross-project mapping',()=>{const b=budget();b.projectId='other';assert.throws(()=>previewBudgetMapping(cost,b,links),/SCOPE/);});
+test('blocks duplicate/unknown mapping',()=>{assert.throws(()=>previewBudgetMapping(cost,budget(),[...links,...links]),/AMBIGUOUS/);assert.throws(()=>previewBudgetMapping(cost,budget(),[{sourceAccount:'1000',budgetAccount:'missing'}]),/AMBIGUOUS/);});
+test('blocks cyclic and missing hierarchy parents',()=>{const b=budget();b.accounts[0].parentId='line';assert.throws(()=>previewBudgetMapping(cost,b,links),/HIERARCHY/);b.accounts[0].parentId='missing';assert.throws(()=>previewBudgetMapping(cost,b,links),/HIERARCHY/);});

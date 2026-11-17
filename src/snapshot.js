@@ -29,7 +29,8 @@ export function preview(report, context) {
     accounts.add(row.account);
     requireValue(row.kind === 'detail', 'SUBTOTAL_NOT_ALLOWED');
     const amounts = Object.fromEntries(fields.map(f => { const n = cents(row[f]); totals[f] += n; return [f, n.toString()]; }));
-    return { account: row.account, sourceRow: i + 1, amounts };
+    requireValue(row.sourceRow === undefined || (Number.isInteger(row.sourceRow) && row.sourceRow > 0 && row.sourceRow <= 10002), 'INVALID_SOURCE_ROW');
+    return { account: row.account, sourceRow: row.sourceRow ?? i + 1, amounts };
   });
   for (const f of fields) requireValue(totals[f] === cents(report.totals?.[f]), 'TOTAL_MISMATCH');
   const snapshot = { source: 'ep-smartaccounting', profile: report.profile, tenantId: report.tenantId, projectId: report.projectId,
@@ -48,5 +49,10 @@ export function compare(previous, next) {
   if (previous.fingerprint === next.fingerprint) return { status: 'unchanged', deltas: {} };
   requireValue(a.revision !== b.revision, 'REVISION_CONFLICT');
   requireValue(b.asOf >= a.asOf, 'OLDER_REPORT');
-  return { status: 'revision-preview', deltas: Object.fromEntries(fields.map(f => [f, (BigInt(b.totals[f]) - BigInt(a.totals[f])).toString()])) };
+  const oldRows = new Map(a.rows.map(r => [r.account, r]));
+  const newRows = new Map(b.rows.map(r => [r.account, r]));
+  const accounts = [...new Set([...oldRows.keys(), ...newRows.keys()])].sort();
+  return { status: 'revision-preview', deltas: Object.fromEntries(fields.map(f => [f, (BigInt(b.totals[f]) - BigInt(a.totals[f])).toString()])),
+    accounts: accounts.map(account => ({ account, change: !oldRows.has(account) ? 'added' : !newRows.has(account) ? 'removed' : 'retained',
+      deltas: Object.fromEntries(fields.map(f => [f, (BigInt(newRows.get(account)?.amounts[f] ?? '0') - BigInt(oldRows.get(account)?.amounts[f] ?? '0')).toString()])) })) };
 }

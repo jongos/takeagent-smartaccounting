@@ -1,0 +1,17 @@
+import { test } from 'node:test';
+import assert from 'node:assert/strict';
+import { fields, compare } from '../src/snapshot.js';
+import { parseCsv, previewCsv } from '../src/csv.js';
+import { costFindings } from '../src/companion.js';
+const context = {tenantId:'demo',projectId:'demo',currency:'USD',today:'2026-11-17'};
+const options = () => ({ mapping:Object.fromEntries(['account',...fields].map(x=>[x,x])), metadata:{...context,sourceProjectId:'demo',revision:'r1',asOf:'2026-11-17',basis:'cumulative',commitmentBasis:'unpaid-not-in-actuals',complete:true},totals:Object.fromEntries(fields.map(x=>[x,'100'])) });
+const csv = () => ['account,'+fields.join(','),'1000,100,100,100,100,100,100'].join('\r\n');
+test('CSV mapping preserves physical row, exact totals and file fingerprint', () => { const p = previewCsv(csv(),options(),context); assert.equal(p.snapshot.rows[0].sourceRow,2); assert.equal(p.snapshot.totals.actuals,'10000'); assert.match(p.provenance.sha256,/^[a-f0-9]{64}$/); });
+test('quoted fields, BOM, CRLF and final newline', () => { assert.deepEqual(parseCsv('\uFEFFa,b\r\n"x,y","z""z"\r\n'),[['a','b'],['x,y','z"z']]); });
+for (const [label, value] of [['ragged','a,b\n1'],['duplicate headers','a,a\n1,2'],['unterminated','a,b\n"1,2'],['trailing junk','a,b\n"1"x,2'],['blank header',',b\n1,2'],['null byte','a,b\n1,\0']]) test(`rejects ${label}`,()=>assert.throws(()=>parseCsv(value)));
+test('rejects oversized data and cells',()=>{assert.throws(()=>parseCsv('a'.repeat(2000001)));assert.throws(()=>parseCsv('a\n'+'x'.repeat(2001)));});
+test('mapping must be complete and distinct',()=>{ const o=options();o.mapping.actuals='account';assert.throws(()=>previewCsv(csv(),o,context),/MAPPING/); });
+test('rejects unrelated upload columns',()=>assert.throws(()=>previewCsv(csv().replace('account,','worker,account,').replace('1000,','private,1000,'),options(),context),/UNSELECTED/));
+test('formula amounts never execute',()=>assert.throws(()=>previewCsv(csv().replace('1000,100,','1000,=1+1,'),options(),context),/AMOUNT/));
+test('account additions/removals visible across same-total revision',()=>{ const a=previewCsv(csv(),options(),context);const o=options();o.metadata.revision='r2';const b=previewCsv(csv().replace('1000,','2000,'),o,context);const c=compare(a,b);assert.deepEqual(c.accounts.map(x=>x.change),['removed','added']); });
+test('cost finding never calls cost overrun a funding gap',()=>{const o=options();o.totals.estimatedFinalCost='150';const p=previewCsv(csv().replace(/100$/,'150'),o,context);const f=costFindings(p);assert.equal(f.findings[0].amount,'5000');assert.equal(f.fundingGap,null);assert.equal(f.cashTimingGap,null);});
