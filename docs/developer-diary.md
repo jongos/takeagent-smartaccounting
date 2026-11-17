@@ -25,3 +25,7 @@ Cross-review found multiline mapped headers could shift physical row references 
 Resolved issue #3 by adding canonical semantic fingerprints keyed by account and scope/report metadata, excluding physical row order. Original ordered fingerprint, CSV source hash and source rows remain available for audit. compare marks reordered identical reports unchanged with provenanceOnly, including legacy previews without the new fingerprint field. Financial changes and scope/date conflicts remain strict.
 
 Validation: all 41 tests passed, including real two-account CSV reorder, distinct audit hashes/source rows, same-total financial reallocation conflict, tenant isolation, older report rejection and legacy snapshot compatibility. No live vendor access or production changes.
+
+## 2026-11-17 — Record current optional host release
+
+Added `docs/host-release-status.md` linking the deployed TakeAgent CSV/Excel release and explaining the division between shared host file handling and this adapter. Preserved optional installation, no-new-configuration behavior and vendor-access limitations. Refetched origin and verified the existing adapter source was already synchronized. The complete repository suite passed 41/41 tests. This commit changes documentation only; no adapter or deployment change is claimed.
