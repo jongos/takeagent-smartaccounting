@@ -19,3 +19,9 @@ Validation: 37 synthetic tests passed locally, covering CSV quoting/limits/malfo
 ## 2026-11-17 â€” Tighten report scope and CSV provenance
 
 Cross-review found multiline mapped headers could shift physical row references and filtered subsets lacked an explicit report-scope restriction. Rejected multiline headers and required a full-project-unfiltered scope declaration, included in snapshot identity and comparison. Clarified the implemented host-budget mapping and cost-question boundaries in README. Validation: 39 tests passed with the new negative cases. The preceding 37-test commit passed hosted Linux CI. Production catalog linkage is still managed separately; no live EP access was exercised.
+
+## 2026-11-17 — Distinguish reordered reports from financial revision conflicts
+
+Resolved issue #3 by adding canonical semantic fingerprints keyed by account and scope/report metadata, excluding physical row order. Original ordered fingerprint, CSV source hash and source rows remain available for audit. compare marks reordered identical reports unchanged with provenanceOnly, including legacy previews without the new fingerprint field. Financial changes and scope/date conflicts remain strict.
+
+Validation: all 41 tests passed, including real two-account CSV reorder, distinct audit hashes/source rows, same-total financial reallocation conflict, tenant isolation, older report rejection and legacy snapshot compatibility. No live vendor access or production changes.

@@ -16,3 +16,18 @@ test('formula amounts never execute',()=>assert.throws(()=>previewCsv(csv().repl
 test('account additions/removals visible across same-total revision',()=>{ const a=previewCsv(csv(),options(),context);const o=options();o.metadata.revision='r2';const b=previewCsv(csv().replace('1000,','2000,'),o,context);const c=compare(a,b);assert.deepEqual(c.accounts.map(x=>x.change),['removed','added']); });
 test('cost finding never calls cost overrun a funding gap',()=>{const o=options();o.totals.estimatedFinalCost='150';const p=previewCsv(csv().replace(/100$/,'150'),o,context);const f=costFindings(p);assert.equal(f.findings[0].amount,'5000');assert.equal(f.fundingGap,null);assert.equal(f.cashTimingGap,null);});
 test('rejects multiline headers to preserve physical row provenance',()=>assert.throws(()=>parseCsv('"account\ncode",value\n1000,1'),/HEADERS/));
+
+test('row reordering is provenance-only while audit file hash and physical rows remain distinct',()=>{
+ const o=options();const header='account,'+fields.join(',');const aRow='1000,40,40,40,40,40,40',bRow='2000,60,60,60,60,60,60';
+ const first=previewCsv([header,aRow,bRow].join('\n'),o,context),reordered=previewCsv([header,bRow,aRow].join('\n'),o,context);
+ assert.notEqual(first.provenance.sha256,reordered.provenance.sha256);assert.notEqual(first.fingerprint,reordered.fingerprint);assert.equal(first.semanticFingerprint,reordered.semanticFingerprint);
+ assert.equal(first.snapshot.rows[0].account,'1000');assert.equal(reordered.snapshot.rows[0].account,'2000');assert.equal(reordered.snapshot.rows[1].sourceRow,3);
+ assert.deepEqual(compare(first,reordered),{status:'unchanged',provenanceOnly:true,deltas:{}});
+ // Older persisted previews without semanticFingerprint remain comparable.
+ const legacy=structuredClone(first);delete legacy.semanticFingerprint;assert.equal(compare(legacy,reordered).status,'unchanged');
+ const changed=previewCsv([header,'1000,40,40,41,40,40,40','2000,60,60,59,60,60,60'].join('\n'),o,context);assert.throws(()=>compare(first,changed),/REVISION_CONFLICT/);
+ const cross={...o,metadata:{...o.metadata,tenantId:'other'}};assert.throws(()=>compare(first,previewCsv([header,bRow,aRow].join('\n'),cross,{...context,tenantId:'other'})),/SCOPE/);
+});
+test('same finances do not hide report date or revision metadata changes',()=>{
+ const first=previewCsv(csv(),options(),context);const o=options();o.metadata.asOf='2026-11-16';assert.throws(()=>compare(first,previewCsv(csv(),o,context)),/REVISION_CONFLICT/);o.metadata.revision='r2';assert.throws(()=>compare(first,previewCsv(csv(),o,context)),/OLDER_REPORT/);
+});

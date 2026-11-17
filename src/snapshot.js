@@ -10,6 +10,11 @@ function cents(value) {
   const [whole, fraction = ''] = value.replace(/^-/, '').split('.');
   return (negative ? -1n : 1n) * (BigInt(whole) * 100n + BigInt(fraction.padEnd(2, '0')));
 }
+// Keep scope/report metadata and per-account values, excluding physical row order.
+function semanticFingerprint(snapshot) {
+  const rows=snapshot.rows.map(({account,amounts})=>({account,amounts:Object.fromEntries(fields.map(field=>[field,amounts[field]]))})).sort((a,b)=>a.account<b.account?-1:a.account>b.account?1:0);
+  return createHash('sha256').update(JSON.stringify({...snapshot,rows})).digest('hex');
+}
 
 /** Synthetic normalized report contract; NOT a verified EP export format or authorization boundary. */
 export function preview(report, context) {
@@ -40,7 +45,7 @@ export function preview(report, context) {
     totals: Object.fromEntries(fields.map(f => [f, totals[f].toString()])) };
   const fingerprint = createHash('sha256').update(JSON.stringify(snapshot)).digest('hex');
   const ageDays = Math.floor((Date.parse(context.today) - Date.parse(report.asOf)) / 86400000);
-  return { snapshot, fingerprint, warnings: ageDays > 30 ? ['STALE_REPORT'] : [], mode: 'preview-only', amountUnit: 'minor-units-2-decimals' };
+  return { snapshot, fingerprint, semanticFingerprint:semanticFingerprint(snapshot), warnings: ageDays > 30 ? ['STALE_REPORT'] : [], mode: 'preview-only', amountUnit: 'minor-units-2-decimals' };
 }
 
 /** Compare snapshots without mutating either or writing any finance-plan entries. */
@@ -48,6 +53,7 @@ export function compare(previous, next) {
   const a = previous.snapshot, b = next.snapshot;
   for (const key of ['tenantId','projectId','sourceProjectId','currency','profile','basis','commitmentBasis','reportScope']) requireValue(a[key] === b[key], 'SNAPSHOT_SCOPE_MISMATCH');
   if (previous.fingerprint === next.fingerprint) return { status: 'unchanged', deltas: {} };
+  if (semanticFingerprint(a) === semanticFingerprint(b)) return { status: 'unchanged', provenanceOnly: true, deltas: {} };
   requireValue(a.revision !== b.revision, 'REVISION_CONFLICT');
   requireValue(b.asOf >= a.asOf, 'OLDER_REPORT');
   const oldRows = new Map(a.rows.map(r => [r.account, r]));

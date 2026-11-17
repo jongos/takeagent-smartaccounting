@@ -23,3 +23,7 @@ Only `takeagent-synthetic-cost-v1` is supported, with USD, EUR, GBP, CAD or AUD.
 ## Research
 
 Reviewed 2026-11-17: [EP SmartAccounting](https://www.ep.com/smartaccounting/) describes configurable cost reporting, EFC updates, currency conversion and integrated POs. This supports investigating cost-report compatibility; it does not establish a public third-party API or a stable export schema. Production compatibility remains unverified.
+
+## Re-export identity
+
+`preview` and `previewCsv` now return `semanticFingerprint` alongside the original ordered `fingerprint`. The original snapshot order, physical source rows and CSV SHA-256 remain unchanged for audit. Semantic identity sorts accounts and excludes source-row positions while retaining all financial measures and report/scope metadata (including revision and as-of date). `compare` returns `{status: 'unchanged', provenanceOnly: true, deltas: {}}` for a reordered re-export with otherwise identical content. It recomputes canonical identity, including for older stored previews without the new field. Changed financial allocations under the same revision still raise `REVISION_CONFLICT`, even if totals match. This library does not implement host storage/idempotency transactions.
