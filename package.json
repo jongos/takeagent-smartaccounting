@@ -1,1 +1,18 @@
-{"name":"takeagent-smartaccounting","version":"0.1.0","private":true,"type":"module","scripts":{"lint":"node --check src/budget-mapping.js src/companion.js src/csv.js src/snapshot.js","test":"node --test"},"engines":{"node":">=22"}}
+{
+  "name": "takeagent-smartaccounting",
+  "version": "0.1.0",
+  "private": true,
+  "description": "Synthetic EP SmartAccounting cost-snapshot preview library for TakeAgent (CSV mapping, reconciliation, revision compare).",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/jongos/takeagent-smartaccounting.git"
+  },
+  "type": "module",
+  "scripts": {
+    "lint": "node --check src/budget-mapping.js src/companion.js src/csv.js src/snapshot.js",
+    "test": "node --test"
+  },
+  "engines": {
+    "node": ">=22"
+  }
+}

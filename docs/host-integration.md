@@ -1,6 +1,6 @@
 # Host integration contract
 
-The manifest registers development availability only. Keep `liveEnabled: false`; a production catalog entry is not a working connection. Repository URLs are internal developer references and should not appear in public product UI.
+The manifest registers development availability only. Keep `liveEnabled: false`; a production catalog entry is not a working connection. Source-repository URLs belong in developer documentation, not in public product UI copy.
 
 ## Read-only pipeline
 

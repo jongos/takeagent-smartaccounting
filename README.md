@@ -1,8 +1,17 @@
 # TakeAgent · EP SmartAccounting
 
-Private development spike for [TakeAgent issue #60](https://github.com/jongos/takeagent/issues/60). This is a tested normalized cost-snapshot preview library, not an EP-certified export parser, live connector, or deployed TakeAgent feature.
+Development library for [TakeAgent issue #60](https://github.com/jongos/takeagent/issues/60): a tested normalized cost-snapshot preview, not an EP-certified export parser, live connector, or deployed TakeAgent feature.
 
-Run `npm test` with Node 22 or later. No dependencies, credentials or external requests are needed. CI runs the same suite on Linux.
+## Install and test
+
+Requires Node 22 or later. Clone the repository, then run:
+
+```bash
+npm run lint
+npm test
+```
+
+There are no npm dependencies, credentials, or external requests. GitHub Actions runs the same lint and test suite on Linux.
 
 The expanded adapter supports bounded selected CSV tables through `parseCsv` / `previewCsv`, explicit column mapping, file hash and row provenance, account-level revision deltas, and source-linked descriptive cost findings. `previewBudgetMapping` previews explicit links into a host budget with validated hierarchy without overwriting it. See [host contract](docs/host-integration.md), [remaining inputs](docs/blockers.md), and [development manifest](integration-manifest.json).
 

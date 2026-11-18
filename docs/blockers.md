@@ -9,7 +9,7 @@
 ## Vendor access
 
 - EP-supported third-party API availability, commercial terms, read-only scopes, project isolation, authentication/revocation and documentation must be confirmed before a live connector is built or advertised. A vendor login alone is not API permission.
-- No vendor contact, fees, credentials or new scopes were requested by the swarm. Do not send credentials in chat or commit them; a later authorized pilot should provision secrets through the host's secret manager.
+- No vendor contact, fees, credentials or new scopes were requested during initial development. Do not send credentials in chat or commit them; a later authorized pilot should provision secrets through the host's secret manager.
 
 ## Engineering (not an owner blocker)
 

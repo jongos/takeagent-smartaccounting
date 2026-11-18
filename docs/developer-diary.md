@@ -2,13 +2,13 @@
 
 ## 2026-11-17 — Start SmartAccounting cost snapshot integration spike
 
-Created a private standalone development repository for TakeAgent issue #60. Added a dependency-free synthetic normalized report preview, exact signed amounts, separate cost measures, report reconciliation, scope checks, deterministic fingerprints and revision comparison. Inputs remain unchanged and no project writes or external calls occur. Documentation distinguishes this contract from verified EP export compatibility and records the integration and authorization gates.
+Created a standalone development repository for TakeAgent issue #60. Added a dependency-free synthetic normalized report preview, exact signed amounts, separate cost measures, report reconciliation, scope checks, deterministic fingerprints and revision comparison. Inputs remain unchanged and no project writes or external calls occur. Documentation distinguishes this contract from verified EP export compatibility and records the integration and authorization gates.
 
 Validation: `npm test` passed 17 tests covering reconciliation, signed credits, privacy minimization, nonmutation, tenant/project/currency mismatch, partial reports, duplicate accounts, subtotals, missing amounts, formulas, excess precision, invalid dates, overlapping commitments, stale data and revision behavior. No deployment or live vendor verification was performed. Excel parsing, vendor report fixtures, account hierarchy, authenticated TakeAgent wiring and finance-review integration remain follow-up work.
 
 ## 2026-11-17 — Restrict currencies to supported precision
 
-Peer review found that accepting any three-letter currency conflicted with the two-decimal minor-unit contract. Restricted the prototype to USD, EUR, GBP, CAD and AUD and documented the boundary. Validation: 18 tests passed, including rejection of JPY, KWD and unknown codes even when context matches. Initial source was pushed to the private repository; no deployment or live EP validation occurred. Other currency exponents remain unsupported.
+Peer review found that accepting any three-letter currency conflicted with the two-decimal minor-unit contract. Restricted the prototype to USD, EUR, GBP, CAD and AUD and documented the boundary. Validation: 18 tests passed, including rejection of JPY, KWD and unknown codes even when context matches. Initial source was pushed to the development repository; no deployment or live EP validation occurred. Other currency exponents remain unsupported.
 
 ## 2026-11-17 — Add mapped CSV previews and cost companion contracts
 
@@ -20,7 +20,7 @@ Validation: 37 synthetic tests passed locally, covering CSV quoting/limits/malfo
 
 Cross-review found multiline mapped headers could shift physical row references and filtered subsets lacked an explicit report-scope restriction. Rejected multiline headers and required a full-project-unfiltered scope declaration, included in snapshot identity and comparison. Clarified the implemented host-budget mapping and cost-question boundaries in README. Validation: 39 tests passed with the new negative cases. The preceding 37-test commit passed hosted Linux CI. Production catalog linkage is still managed separately; no live EP access was exercised.
 
-## 2026-11-17 � Distinguish reordered reports from financial revision conflicts
+## 2026-11-17 — Distinguish reordered reports from financial revision conflicts
 
 Resolved issue #3 by adding canonical semantic fingerprints keyed by account and scope/report metadata, excluding physical row order. Original ordered fingerprint, CSV source hash and source rows remain available for audit. compare marks reordered identical reports unchanged with provenanceOnly, including legacy previews without the new fingerprint field. Financial changes and scope/date conflicts remain strict.
 
@@ -34,4 +34,10 @@ Added `docs/host-release-status.md` linking the deployed TakeAgent CSV/Excel rel
 
 Triage on `origin/main` at `50e18be`: #3 closed on main (`72558e5`); #1 closed as host-catalog work; #2 still blocked on vendor export/API input. Implemented code fixes for open defects #4–#10: compare no longer treats missing fingerprints as unchanged; stored snapshots are validated before `BigInt` conversion; budget-mapping links reject null or malformed entries; snapshot `fingerprint` uses canonical key ordering via exported `fingerprintSnapshot`; amount parsing returns distinct codes for parentheses, grouping, currency symbols, and decimal-comma formats; `parseCsv` fails at 10,000 data rows to match `preview()`; CI runs `npm run lint` plus expanded regression tests.
 
-Validation: `npm run lint` and `npm test` passed 51/51. Supersedes the overlapping open PR #11 branch for coordinator review on `cursor/fix-open-github-issues-7274`. No vendor fixtures, secrets, or live EP access.
+Validation: `npm run lint` and `npm test` passed 51/51. Merged via PR #12 after review on overlapping fix branches. No vendor fixtures, secrets, or live EP access.
+
+## 2026-11-18 — Prepare repository for public release
+
+Scrubbed documentation for open-source readers: public-facing README install/test instructions, generic host validation wording (no production project titles), removal of internal coordination/swarm phrasing, expanded `.gitignore`, and package metadata (`description`, `repository`). Ran gitleaks (10 commits, no leaks), trufflehog git scan (0 verified/unverified secrets), and manual pattern greps across the working tree and history (no API keys, tokens, or private keys). No credential rotation required.
+
+Validation: `npm run lint` and `npm test` passed 51/51. License file left for owner decision; repository visibility not changed in this commit.
