@@ -41,3 +41,7 @@ Validation: `npm run lint` and `npm test` passed 51/51. Merged via PR #12 after 
 Scrubbed documentation for open-source readers: public-facing README install/test instructions, generic host validation wording (no production project titles), removal of internal coordination/swarm phrasing, expanded `.gitignore`, and package metadata (`description`, `repository`). Ran gitleaks (10 commits, no leaks), trufflehog git scan (0 verified/unverified secrets), and manual pattern greps across the working tree and history (no API keys, tokens, or private keys). No credential rotation required.
 
 Validation: `npm run lint` and `npm test` passed 51/51. License file left for owner decision; repository visibility not changed in this commit.
+
+## 2026-11-18 — Adopt the MediaHedge License
+
+Added the proprietary `LICENSE` (MediaHedge License v1.0), set `package.json` `license` to `SEE LICENSE IN LICENSE`, and documented terms in the README. Validation: `npm run lint` and `npm test` pass locally. No adapter or runtime code changes.
