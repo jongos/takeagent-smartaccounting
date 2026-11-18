@@ -36,3 +36,7 @@ Reviewed 2026-11-17: [EP SmartAccounting](https://www.ep.com/smartaccounting/) d
 ## Re-export identity
 
 `preview` and `previewCsv` now return `semanticFingerprint` alongside the original ordered `fingerprint`. The original snapshot order, physical source rows and CSV SHA-256 remain unchanged for audit. Semantic identity sorts accounts and excludes source-row positions while retaining all financial measures and report/scope metadata (including revision and as-of date). `compare` returns `{status: 'unchanged', provenanceOnly: true, deltas: {}}` for a reordered re-export with otherwise identical content. It recomputes canonical identity, including for older stored previews without the new field. Changed financial allocations under the same revision still raise `REVISION_CONFLICT`, even if totals match. This library does not implement host storage/idempotency transactions.
+
+## License
+
+Licensed under the MediaHedge License. Use is permitted only as allowed by the TakeAgent Terms of Service at https://takeagent.ai/terms. See LICENSE.

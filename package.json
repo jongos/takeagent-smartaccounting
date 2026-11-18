@@ -1,6 +1,7 @@
 {
   "name": "takeagent-smartaccounting",
   "version": "0.1.0",
+  "license": "SEE LICENSE IN LICENSE",
   "private": true,
   "description": "Synthetic EP SmartAccounting cost-snapshot preview library for TakeAgent (CSV mapping, reconciliation, revision compare).",
   "repository": {
