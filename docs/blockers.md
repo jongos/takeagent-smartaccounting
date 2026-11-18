@@ -13,7 +13,7 @@
 
 ## Engineering (not an owner blocker)
 
-- Native XLSX parsing and vendor profile validation need the representative export. Generic CSV mapping/reconciliation is implemented and tested now.
+- A provisional native CRW CSV profile (`ep-smartaccounting-crw-export-v1-provisional`) is implemented from public EP column documentation. Native XLSX parsing and user-attested export header validation are still required to exit provisional status.
 - The production catalog may show development status now; authenticated upload UI and cost-snapshot persistence remain a later host integration. The host contract specifies required tenant, entitlement, concurrency, retention and explicit-apply controls.
 - Cost questions are implemented; actual funding/cash-timing findings require the host's separate finance-plan evidence and cash schedule. No inferred funding has been added.
 - Independent real-format acceptance and production end-to-end import testing remain pending. Synthetic tests establish library behavior, not vendor certification.

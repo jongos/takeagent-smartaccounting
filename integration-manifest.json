@@ -3,8 +3,34 @@
   "displayName": "EP SmartAccounting",
   "status": "development",
   "liveEnabled": false,
-  "capabilities": ["bounded-csv-preview", "explicit-column-mapping", "signed-cost-reconciliation", "revision-comparison", "source-linked-cost-findings", "explicit-budget-account-mapping"],
-  "blockers": ["Representative sanitized EP report and version needed", "Vendor export schema validation pending", "Native XLSX and authenticated host wiring pending", "Vendor-supported API access and terms unverified"],
+  "capabilities": [
+    "bounded-csv-preview",
+    "explicit-column-mapping",
+    "provisional-ep-crw-native-export",
+    "signed-cost-reconciliation",
+    "revision-comparison",
+    "source-linked-cost-findings",
+    "stable-line-identifiers",
+    "explicit-budget-account-mapping"
+  ],
+  "profiles": [
+    {
+      "id": "takeagent-synthetic-cost-v1",
+      "certification": "synthetic-contract",
+      "entrypoint": "previewCsv"
+    },
+    {
+      "id": "ep-smartaccounting-crw-export-v1-provisional",
+      "certification": "provisional",
+      "entrypoint": "previewCrwExport",
+      "documentation": "docs/native-profiles/ep-crw-cost-report-v1-provisional.md"
+    }
+  ],
+  "blockers": [
+    "User-attested EP export header spelling and row-type values needed to exit provisional",
+    "Native XLSX and authenticated host wiring pending",
+    "Vendor-supported API access and terms unverified"
+  ],
   "sourceIssue": "https://github.com/jongos/takeagent/issues/60",
   "repository": "https://github.com/jongos/takeagent-smartaccounting"
 }

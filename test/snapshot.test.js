@@ -11,6 +11,7 @@ function fixture() {
 test('exact cents, minimization and nonmutation', () => {
   const r = fixture(); r.rows[0].workerName = 'MUST_NOT_LEAVE'; const original = structuredClone(r);
   const p = preview(r, context); assert.equal(p.snapshot.totals.actuals, '10000');
+  assert.equal(p.snapshot.rows[0].lineId, '1000');
   assert.ok(!JSON.stringify(p).includes('MUST_NOT_LEAVE')); assert.deepEqual(r, original);
 });
 test('credits remain signed and reconcile', () => { const r = fixture(); r.rows[0].actuals = '-5.25'; r.totals.actuals = '-5.25'; assert.equal(preview(r, context).snapshot.totals.actuals, '-525'); });

@@ -10,7 +10,7 @@
   },
   "type": "module",
   "scripts": {
-    "lint": "node --check src/budget-mapping.js src/companion.js src/csv.js src/snapshot.js",
+    "lint": "node --check src/budget-mapping.js src/companion.js src/csv.js src/native-crw.js src/profiles.js src/snapshot.js",
     "test": "node --test"
   },
   "engines": {

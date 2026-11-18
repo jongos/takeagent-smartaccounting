@@ -17,9 +17,16 @@ The expanded adapter supports bounded selected CSV tables through `parseCsv` / `
 
 `preview(report, context)` accepts the synthetic contract demonstrated in `test/snapshot.test.js`. It keeps six cost measures separate, requires exact signed decimal amounts, checks totals and scope, rejects subtotals/duplicate accounts, strips unrelated fields, and returns provenance, a deterministic fingerprint and stale-report warnings. Amounts in output are integer minor-unit strings using two decimal places. `compare` handles repeated imports and previews revision deltas without mutation. Input limits are 10,000 detail rows and 12 integer digits per amount. Only cumulative, single-currency reports with unpaid commitments explicitly excluded from actuals are supported. No FX conversion or currency-specific precision inference.
 
-## Supported profile
+## Supported profiles
 
-Only `takeagent-synthetic-cost-v1` is supported, with USD, EUR, GBP, CAD or AUD. Other currency exponents are rejected. No actual EP report version is certified. Missing fields fail; values are never inferred from EFC or other columns. The normalized input requires tenant/project IDs, source project and revision, as-of date, currency, reporting basis, detail account IDs, six distinct measures and independent report totals. CSV source-row numbers refer to the selected input table; direct normalized input retains caller-supplied row provenance. Host budget hierarchy can be linked explicitly; vendor hierarchy extraction and original Excel cell provenance remain future work.
+| Profile ID | Status | Entrypoint |
+| --- | --- | --- |
+| `takeagent-synthetic-cost-v1` | Synthetic contract (tests and explicit column mapping) | `preview`, `previewCsv` |
+| `ep-smartaccounting-crw-export-v1-provisional` | Provisional native CRW layout | `previewCrwExport` |
+
+Both profiles accept USD, EUR, GBP, CAD or AUD. Other currency exponents are rejected. No actual EP report package version is vendor-certified. Missing fields fail; values are never inferred from EFC or other columns. The normalized input requires tenant/project IDs, source project and revision, as-of date, currency, reporting basis, detail account IDs, six distinct measures, stable `lineId` values, and independent report totals. CSV source-row numbers refer to the selected input table; direct normalized input retains caller-supplied row provenance. Host budget hierarchy can be linked explicitly; vendor hierarchy extraction and original Excel cell provenance remain future work.
+
+The provisional native profile maps public EP Cost Report Worksheet column labels documented by Entertainment Partners into the normalized snapshot. See [docs/native-profiles/ep-crw-cost-report-v1-provisional.md](docs/native-profiles/ep-crw-cost-report-v1-provisional.md) and [PROVENANCE.md](PROVENANCE.md).
 
 ## Next work
 
