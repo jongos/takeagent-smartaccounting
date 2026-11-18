@@ -1,4 +1,5 @@
 import { createHash } from 'node:crypto';
+import { requireProfile } from './profiles.js';
 
 export const fields = Object.freeze(['originalBudget', 'revisedBudget', 'actuals', 'openCommitments', 'estimateToComplete', 'estimatedFinalCost']);
 function requireValue(condition, code) { if (!condition) throw new Error(code); }
@@ -28,7 +29,7 @@ function requireComparedSnapshot(snapshot) {
   requireValue(Array.isArray(snapshot.rows) && snapshot.totals && typeof snapshot.totals === 'object', 'INVALID_SNAPSHOT');
   for (const f of fields) requireValue(minorAmount(snapshot.totals[f]), 'INVALID_SNAPSHOT');
   for (const row of snapshot.rows) {
-    requireValue(row && typeof row === 'object' && identifier(row.account) && row.amounts && typeof row.amounts === 'object', 'INVALID_SNAPSHOT');
+    requireValue(row && typeof row === 'object' && identifier(row.account) && identifier(row.lineId) && row.amounts && typeof row.amounts === 'object', 'INVALID_SNAPSHOT');
     for (const f of fields) requireValue(minorAmount(row.amounts[f]), 'INVALID_SNAPSHOT');
   }
 }
@@ -37,13 +38,18 @@ export function fingerprintSnapshot(snapshot) {
 }
 // Keep scope/report metadata and per-account values, excluding physical row order.
 function semanticFingerprint(snapshot) {
-  const rows=snapshot.rows.map(({account,amounts})=>({account,amounts:Object.fromEntries(fields.map(field=>[field,amounts[field]]))})).sort((a,b)=>a.account<b.account?-1:a.account>b.account?1:0);
-  return createHash('sha256').update(JSON.stringify({...snapshot,rows})).digest('hex');
+  const rows = snapshot.rows
+    .map(({ lineId, account, amounts }) => ({
+      lineId,
+      account,
+      amounts: Object.fromEntries(fields.map(field => [field, amounts[field]])),
+    }))
+    .sort((a, b) => (a.lineId < b.lineId ? -1 : a.lineId > b.lineId ? 1 : 0));
+  return createHash('sha256').update(JSON.stringify({ ...snapshot, rows })).digest('hex');
 }
 
-/** Synthetic normalized report contract; NOT a verified EP export format or authorization boundary. */
 export function preview(report, context) {
-  requireValue(report?.profile === 'takeagent-synthetic-cost-v1', 'UNSUPPORTED_PROFILE');
+  const profile = requireProfile(report?.profile);
   requireValue(context && identifier(context.tenantId) && identifier(context.projectId), 'INVALID_CONTEXT');
   requireValue(report.tenantId === context.tenantId && report.projectId === context.projectId, 'PROJECT_MISMATCH');
   requireValue(identifier(report.sourceProjectId) && identifier(report.revision), 'INVALID_PROVENANCE');
@@ -61,16 +67,26 @@ export function preview(report, context) {
     requireValue(row.kind === 'detail', 'SUBTOTAL_NOT_ALLOWED');
     const amounts = Object.fromEntries(fields.map(f => { const n = cents(row[f]); totals[f] += n; return [f, n.toString()]; }));
     requireValue(row.sourceRow === undefined || (Number.isInteger(row.sourceRow) && row.sourceRow > 0 && row.sourceRow <= 10002), 'INVALID_SOURCE_ROW');
-    return { account: row.account, sourceRow: row.sourceRow ?? i + 1, amounts };
+    const lineId = typeof row.lineId === 'string' && identifier(row.lineId) ? row.lineId : profile.lineIdForAccount(row.account);
+    requireValue(identifier(lineId), 'INVALID_LINE_ID');
+    return { account: row.account, lineId, sourceRow: row.sourceRow ?? i + 1, amounts };
   });
   for (const f of fields) requireValue(totals[f] === cents(report.totals?.[f]), 'TOTAL_MISMATCH');
-  const snapshot = { source: 'ep-smartaccounting', profile: report.profile, tenantId: report.tenantId, projectId: report.projectId,
+  const snapshot = { source: 'ep-smartaccounting', profile: report.profile, certification: profile.certification, tenantId: report.tenantId, projectId: report.projectId,
     sourceProjectId: report.sourceProjectId, revision: report.revision, asOf: report.asOf, currency: report.currency,
     basis: report.basis, commitmentBasis: report.commitmentBasis, reportScope: report.reportScope, rows,
     totals: Object.fromEntries(fields.map(f => [f, totals[f].toString()])) };
   const fingerprint = fingerprintSnapshot(snapshot);
   const ageDays = Math.floor((Date.parse(context.today) - Date.parse(report.asOf)) / 86400000);
-  return { snapshot, fingerprint, semanticFingerprint:semanticFingerprint(snapshot), warnings: ageDays > 30 ? ['STALE_REPORT'] : [], mode: 'preview-only', amountUnit: 'minor-units-2-decimals' };
+  return {
+    snapshot,
+    fingerprint,
+    semanticFingerprint: semanticFingerprint(snapshot),
+    warnings: ageDays > 30 ? ['STALE_REPORT'] : [],
+    mode: 'preview-only',
+    amountUnit: 'minor-units-2-decimals',
+    profileCertification: profile.certification,
+  };
 }
 
 /** Compare snapshots without mutating either or writing any finance-plan entries. */
@@ -84,10 +100,20 @@ export function compare(previous, next) {
   if (semanticFingerprint(a) === semanticFingerprint(b)) return { status: 'unchanged', provenanceOnly: true, deltas: {} };
   requireValue(a.revision !== b.revision, 'REVISION_CONFLICT');
   requireValue(b.asOf >= a.asOf, 'OLDER_REPORT');
-  const oldRows = new Map(a.rows.map(r => [r.account, r]));
-  const newRows = new Map(b.rows.map(r => [r.account, r]));
-  const accounts = [...new Set([...oldRows.keys(), ...newRows.keys()])].sort();
-  return { status: 'revision-preview', deltas: Object.fromEntries(fields.map(f => [f, (BigInt(b.totals[f]) - BigInt(a.totals[f])).toString()])),
-    accounts: accounts.map(account => ({ account, change: !oldRows.has(account) ? 'added' : !newRows.has(account) ? 'removed' : 'retained',
-      deltas: Object.fromEntries(fields.map(f => [f, (BigInt(newRows.get(account)?.amounts[f] ?? '0') - BigInt(oldRows.get(account)?.amounts[f] ?? '0')).toString()])) })) };
+  const oldRows = new Map(a.rows.map(r => [r.lineId, r]));
+  const newRows = new Map(b.rows.map(r => [r.lineId, r]));
+  const lineIds = [...new Set([...oldRows.keys(), ...newRows.keys()])].sort();
+  return {
+    status: 'revision-preview',
+    deltas: Object.fromEntries(fields.map(f => [f, (BigInt(b.totals[f]) - BigInt(a.totals[f])).toString()])),
+    accounts: lineIds.map(lineId => ({
+      account: newRows.get(lineId)?.account ?? oldRows.get(lineId)?.account,
+      lineId,
+      change: !oldRows.has(lineId) ? 'added' : !newRows.has(lineId) ? 'removed' : 'retained',
+      deltas: Object.fromEntries(fields.map(f => [
+        f,
+        (BigInt(newRows.get(lineId)?.amounts[f] ?? '0') - BigInt(oldRows.get(lineId)?.amounts[f] ?? '0')).toString(),
+      ])),
+    })),
+  };
 }

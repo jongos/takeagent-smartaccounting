@@ -1,0 +1,4 @@
+Row Type,Account,Description,Actuals This Period,Actuals,POs,Total Cost,ETC,EFC,Budget,Approved Overages,Adjusted Budget,Variance,Change in Variance,% Remaining
+Account,1100,Line item alpha,500.00,2500.00,100.00,2600.00,400.00,2900.00,3000.00,0.00,3000.00,100.00,0.00,13.79
+Account,2100,Line item beta,0.00,800.00,50.00,850.00,150.00,950.00,1000.00,50.00,1050.00,50.00,0.00,15.79
+Account,9000,Contingency reserve,0.00,0.00,0.00,0.00,25000.00,25000.00,25000.00,0.00,25000.00,0.00,0.00,100.00
