@@ -1,6 +1,6 @@
 # TakeAgent · EP SmartAccounting
 
-Development library for the [EP SmartAccounting integration](https://takeagent.ai/integrations/smartaccounting): a tested normalized cost-snapshot preview, not an EP-certified export parser, live connector, or deployed TakeAgent feature.
+Development library for the [EP SmartAccounting integration](https://takeagent.ai/integrations/ep-smartaccounting): a tested normalized cost-snapshot preview, not an EP-certified export parser, live connector, or deployed TakeAgent feature.
 
 ## Install and test
 
