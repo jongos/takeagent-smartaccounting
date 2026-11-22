@@ -96,9 +96,12 @@ test('cost findings stay descriptive and refuse funding conclusions', () => {
   };
   const preview = previewCrwExport(text, { metadata: metadata(), totals }, context);
   const findings = costFindings(preview);
-  assert.equal(findings.fundingGap, null);
-  assert.equal(findings.fundingGapStatus, 'refused');
-  assert.equal(findings.cashTimingGap, null);
+  assert.equal(findings.fundingDeficit, null);
+  assert.equal(findings.fundingDeficitStatus, 'refused');
+  assert.equal(findings.cashTimingDeficit, null);
+  assert.equal(findings.fundingGap, findings.fundingDeficit);
+  assert.equal(findings.fundingGapStatus, findings.fundingDeficitStatus);
+  assert.equal(findings.cashTimingGap, findings.cashTimingDeficit);
   assert.ok(findings.findings.some(f => f.code === 'PROVISIONAL_VENDOR_PROFILE'));
   assert.ok(findings.findings.some(f => f.code === 'EFC_EXCEEDS_REVISED_BUDGET' && f.lineId === 'ep.crw.v1:1100'));
   assert.ok(findings.findings.every(f => !String(f.question ?? '').toLowerCase().includes('funding gap')));

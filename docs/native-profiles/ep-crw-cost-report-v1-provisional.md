@@ -45,7 +45,7 @@ previewCrwExport(csvText, { metadata, totals }, trustedContext);
 - `EFC_EXCEEDS_REVISED_BUDGET`, `ACTUALS_EXCEED_EFC` — row-level descriptive questions (include `lineId`).
 - `TOTAL_COST_COLUMN_MISMATCH` — when optional `Total Cost` and `Actuals`/`POs` columns are present but `Actuals + POs !== Total Cost`.
 
-Funding conclusions are refused: `fundingGap` is always `null` and `fundingGapStatus` is `refused`.
+Funding conclusions are refused: `fundingDeficit` is always `null` and `fundingDeficitStatus` is `refused`. Deprecated response keys `fundingGap`, `fundingGapStatus`, and `cashTimingGap` mirror those values for older callers.
 
 ## What a user-attested sample must confirm
 
