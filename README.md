@@ -1,6 +1,6 @@
 # TakeAgent · EP SmartAccounting
 
-Development library for [TakeAgent issue #60](https://github.com/jongos/takeagent/issues/60): a tested normalized cost-snapshot preview, not an EP-certified export parser, live connector, or deployed TakeAgent feature.
+Development library for the [EP SmartAccounting integration](https://takeagent.ai/integrations/ep-smartaccounting): a tested normalized cost-snapshot preview, not an EP-certified export parser, live connector, or deployed TakeAgent feature.
 
 ## Install and test
 
@@ -33,7 +33,7 @@ The provisional native profile maps public EP Cost Report Worksheet column label
 1. Obtain a synthetic representative EP Excel export and document its version, field meanings and account hierarchy. Build an explicit mapping preview using TakeAgent's existing bounded document readers; do not copy the nonnegative budget-only parser for signed accounting costs.
 2. Verify account mapping against Movie Magic and report totals. Keep original/revised budgets and the finance plan separate.
 3. Integrate behind existing TakeAgent authentication, project access, usage limits, retention controls and explicit apply. This library is not an authentication mechanism; host-supplied context must come from trusted server authorization. Do not expose it directly as an unauthenticated service.
-4. Connect the implemented descriptive cost questions to read-only financing analysis through existing finance-review services. Cost changes alone are not funding commitments or collateral evidence. No financing-gap or cash-timing conclusion is implemented here.
+4. Connect the implemented descriptive cost questions to read-only financing analysis through existing finance-review services. Cost changes alone are not funding commitments or collateral evidence. No funding-deficit or cash-timing shortfall conclusion is implemented here.
 5. Verify any live API access and terms with EP before implementation or advertising. No payroll, payment, external accounting writes, or live feed is included.
 
 ## Research

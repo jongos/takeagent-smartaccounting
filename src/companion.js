@@ -57,12 +57,16 @@ export function costFindings(preview) {
     }
   }
   const fundingGap = null;
+  const fundingGapStatus = 'refused';
   const cashTimingGap = null;
   return {
     findings,
     fundingGap,
-    fundingGapStatus: 'refused',
+    fundingGapStatus,
     cashTimingGap,
+    fundingDeficit: fundingGap,
+    fundingDeficitStatus: fundingGapStatus,
+    cashTimingDeficit: cashTimingGap,
     limitation: 'Financing commitments and dated cash flows require separate evidence.',
     readOnly: true,
   };

@@ -31,6 +31,6 @@
     "Native XLSX and authenticated host wiring pending",
     "Vendor-supported API access and terms unverified"
   ],
-  "sourceIssue": "https://github.com/jongos/takeagent/issues/60",
+  "sourceIssue": "https://takeagent.ai/integrations/ep-smartaccounting",
   "repository": "https://github.com/jongos/takeagent-smartaccounting"
 }

@@ -24,4 +24,4 @@ To move `ep-smartaccounting-crw-export-v1-provisional` from provisional to certi
 4. Currency exponent and cumulative period basis for the uploaded report package.
 5. Whether PO amounts represent only unpaid commitments excluded from Actuals (required by the normalized basis).
 
-Until then, adapters must surface `PROVISIONAL_VENDOR_PROFILE` via `costFindings` and keep `fundingGap` null with `fundingGapStatus: refused`.
+Until then, adapters must surface `PROVISIONAL_VENDOR_PROFILE` via `costFindings` and keep `fundingDeficit` null with `fundingDeficitStatus: refused` (legacy `fundingGap` / `fundingGapStatus` remain for compatibility).
